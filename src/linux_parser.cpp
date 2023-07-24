@@ -295,5 +295,4 @@ long LinuxParser::UpTime(int pid) {
   time = stol(stat[21]);
   return time / sysconf(_SC_CLK_TCK);
 }
-
 //{ return 0; }
