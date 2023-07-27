@@ -126,7 +126,7 @@ long LinuxParser::ActiveJiffies(int pid) {
       }
     }
   }
-  TotalTime = stol(VecValues[13]) + stol(VecValues[14]) + stol(VecValues[15]) + stol(VecValues[16]); // including children's time
+  TotalTime = (stof(VecValues[13]) + stof(VecValues[14]) + stof(VecValues[15]) + stof(VecValues[16])); // including children's time
   return TotalTime / sysconf(_SC_CLK_TCK);
 }
 //{ return 0; }
@@ -280,7 +280,7 @@ long LinuxParser::UpTime(int pid) {
   string line;
   string StrPid = to_string(pid);
   string key;
-  long time;
+  long Starttime, UpTime;
   vector<std::string> stat{};
   std::ifstream stream(kProcDirectory + StrPid + kStatFilename);
   if(stream.is_open()) {
@@ -292,7 +292,8 @@ long LinuxParser::UpTime(int pid) {
       }
     }
   }
-  time = stol(stat[21]);
-  return time / sysconf(_SC_CLK_TCK);
+  Starttime = stol(stat[21]);
+  UpTime = LinuxParser::UpTime() - (Starttime / sysconf(_SC_CLK_TCK));
+  return UpTime;
 }
 //{ return 0; }
