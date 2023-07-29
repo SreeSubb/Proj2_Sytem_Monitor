@@ -79,11 +79,19 @@ float LinuxParser::MemoryUtilization() {
       std::istringstream linestream(line);
       while(linestream >> key >> memory >> kb) {
         if (key == "MemTotal") {
-          MemoryTotal = stof(memory);
-          // string MemoryTotal = memory;
-        } else if (key == "MemFree") {
-          MemoryFree = stof(memory);
-          //string MemoryFree = memory;
+          //MemoryTotal = stof(memory);
+          try {
+            MemoryTotal = stof(memory);
+            } catch (std::invalid_argument& e) {
+              MemoryTotal = 0;
+              }
+          } else if (key == "MemFree") {
+          //MemoryFree = stof(memory);
+          try {
+            MemoryFree = stof(memory);
+            } catch (std::invalid_argument& e) {
+              MemoryFree = 0;
+              }
         }
       }
     }
@@ -97,14 +105,20 @@ long LinuxParser::UpTime() {
   string line;
   string uptime;
   string idletime;
+  long SysUpTime;
   std::ifstream stream(kProcDirectory + kUptimeFilename);
   if (stream.is_open()) {
     std::getline(stream, line);
     std::istringstream linestream(line);
     linestream >> uptime >> idletime;
-    return std::stol(uptime);
+    //return std::stol(uptime);
+    try {
+      SysUpTime = std::stol(uptime);
+      } catch (std::invalid_argument& e) {
+        SysUpTime = 0;
+        }
   }
-  return std::stol(uptime);
+  return SysUpTime;
 }
 //{ return 0; }
 // TODO: Read and return the number of jiffies for the system
@@ -126,7 +140,12 @@ long LinuxParser::ActiveJiffies(int pid) {
       }
     }
   }
-  TotalTime = (stof(VecValues[13]) + stof(VecValues[14]) + stof(VecValues[15]) + stof(VecValues[16])); // including children's time
+  //TotalTime = (stof(VecValues[13]) + stof(VecValues[14]) + stof(VecValues[15]) + stof(VecValues[16])); // including children's time
+  try {
+    TotalTime = (stof(VecValues[13]) + stof(VecValues[14]) + stof(VecValues[15]) + stof(VecValues[16]));
+    } catch (std::invalid_argument& e) {
+      TotalTime = 0;
+    }
   return TotalTime / sysconf(_SC_CLK_TCK);
 }
 //{ return 0; }
@@ -159,18 +178,24 @@ int LinuxParser::TotalProcesses() {
   string line;
   string key;
   string value;
+  int total;
   std::ifstream stream(kProcDirectory + kStatFilename);
   if (stream.is_open()) {
     while(std::getline(stream, line)) {
     std::istringstream linestream(line);
        while (linestream >> key >> value) {
         if (key == "processes") {
-          return std::stoi(value);
+          //return std::stoi(value);
+          try {
+            total = std::stoi(value);
+            } catch (std::invalid_argument& e) {
+              total = 0;
+              }
         }
       } 
     }
   }
-  return std::stoi(value);
+  return total;
 }
 
 // TODO: Read and return the number of running processes
@@ -178,18 +203,24 @@ int LinuxParser::RunningProcesses() {
   string line;
   string key;
   string value;
+  int processes;
   std::ifstream stream(kProcDirectory + kStatFilename);
   if (stream.is_open()) {
     while(std::getline(stream, line)) {
     std::istringstream linestream(line);
       while (linestream >> key >> value) {
         if (key == "procs_running") {
-          return std::stoi(value);
+          //return std::stoi(value);
+          try {
+            processes = std::stoi(value);
+            } catch (std::invalid_argument& e) {
+              processes = 0;
+              }
         }
       }
     }
   }
-  return std::stoi(value);
+  return processes;
 }
 //{ return 0; }
 /* same as TotalProcesses*/
@@ -221,7 +252,12 @@ string LinuxParser::Ram(int pid) {
     std::istringstream linestream(line);
       while (linestream >> key >> memory) {
         if (key == "VmSize") {
-          RamMB = stoi(memory) / 1024;
+          //RamMB = stoi(memory) / 1024;
+          try {
+            RamMB = stoi(memory) / 1024;
+            } catch (std::invalid_argument& e) {
+              RamMB = 0;
+              }
           return to_string(RamMB);
         }
       }
@@ -292,7 +328,12 @@ long LinuxParser::UpTime(int pid) {
       }
     }
   }
-  Starttime = stol(stat[21]);
+  //Starttime = stol(stat[21]);
+  try {
+    Starttime = stol(stat[21]);
+    } catch (std::invalid_argument& e) {
+      Starttime = 0;
+    }
   UpTime = LinuxParser::UpTime() - (Starttime / sysconf(_SC_CLK_TCK));
   return UpTime;
 }
